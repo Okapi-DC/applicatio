@@ -1,0 +1,196 @@
+<template>
+  <div class="background_03">
+    <navbarapp></navbarapp>
+    <headerapp></headerapp>
+    <b-container>
+    <div class="row">
+      <h2 class="title_dash_prima" style="text-align: left">Mon profil</h2>
+      <div class="col-md-6">
+          <div class="padding_top_30">
+            <button class="btn_picture" @click="click1"><svg class="picture" width="40" height="36" viewBox="0 0 40 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M26.6347 0.709335C27.802 1.17394 28.6274 2.01139 29.3673 3.23912L29.6111 3.66285L30.5155 5.39715L30.5453 5.44558L30.5723 5.48773L30.6491 5.59275C31.0612 6.04175 31.7508 6.313 32.206 6.313C36.3755 6.313 39.7811 9.58752 39.9899 13.7041L40 14.105V25.695C40 31.039 35.7796 35.4 30.4911 35.6258L30.06 35.635H9.94C4.59468 35.635 0.234941 31.4152 0.00918343 26.1261L0 25.695V14.105C0 9.80219 3.48996 6.313 7.794 6.313C8.24755 6.313 8.93816 6.04136 9.35088 5.59275L9.3651 5.57598L9.38289 5.55267L9.48575 5.39491L10.3876 3.6634C11.1915 2.20235 12.0661 1.22566 13.3638 0.709147C15.7418 -0.236414 24.2586 -0.236414 26.6347 0.709335ZM14.4727 3.49666C14.0299 3.6729 13.629 4.08083 13.2012 4.78801L13.016 5.10961L12.2463 6.5978L12.0569 6.94066C11.8987 7.20372 11.7405 7.42577 11.5599 7.62258C10.6391 8.6235 9.31693 9.20161 8.14164 9.29844L7.794 9.313L7.46581 9.32406C5.07995 9.48538 3.17242 11.3925 3.01106 13.777L3 14.105V25.695C3 29.3996 5.90348 32.427 9.55922 32.6247L9.94 32.635H30.06C33.7639 32.635 36.792 29.7303 36.9897 26.0757L37 25.695V14.105C37 11.5694 35.0285 9.49272 32.5342 9.32406L32.206 9.313L31.8578 9.29844C30.6807 9.20159 29.3586 8.62333 28.4389 7.62125C28.2606 7.42705 28.1033 7.20657 27.9461 6.94574L27.9083 6.88108L27.8633 6.80078L27.6311 6.36528L26.9833 5.11016C26.5459 4.31595 26.1453 3.83056 25.7128 3.58662L25.5253 3.49666L25.2866 3.41733C23.2283 2.83556 16.0688 2.86201 14.4727 3.49666ZM19.9994 12.3984C24.3398 12.3984 27.8574 15.916 27.8574 20.2564C27.8574 24.5968 24.3398 28.1144 19.9994 28.1144C15.659 28.1144 12.1414 24.5968 12.1414 20.2564C12.1414 15.916 15.659 12.3984 19.9994 12.3984ZM19.9994 15.3984C17.3158 15.3984 15.1414 17.5728 15.1414 20.2564C15.1414 22.94 17.3158 25.1144 19.9994 25.1144C22.683 25.1144 24.8574 22.94 24.8574 20.2564C24.8574 17.5728 22.683 15.3984 19.9994 15.3984ZM31.0086 11.0004C32.1132 11.0004 33.0086 11.8958 33.0086 13.0004C33.0086 14.0261 32.2365 14.8714 31.2418 14.9869L31.0086 15.0004C29.886 15.0004 28.9906 14.105 28.9906 13.0004C28.9906 11.9747 29.7627 11.1294 30.7574 11.0139L31.0086 11.0004Z" fill="white"/></svg>
+              <div v-if="imageData!=null">
+                <img class="preview" :src="img1">
+              </div>
+              <input class="btn_01" type="file" ref="input1" style="display: none" @change="previewImage" accept="image/*" >
+            </button>
+
+            <b-form-input v-model="name" type="text" class="margin_top_30 input_01" placeholder="Steve Jobs"></b-form-input>
+
+          </div>
+      </div>
+      <div class="col-md-5">
+      </div>
+    </div>
+    </b-container>
+  </div>
+</template>
+
+<script>
+import Navbarapp from "@/components/layout/navbarapp";
+import Headerapp from "@/components/app/headerapp";
+import firebase from 'firebase'
+import {mapState, mapActions} from 'vuex'
+
+export default {
+name: "parametres",
+  data() {
+    return {
+      name:'',
+      caption: '',
+      img1: '',
+      imageData: null,
+    }
+  },
+  components: {Headerapp, Navbarapp},
+  computed: {
+    ...mapState(['currentUser', 'currentUserProfile'])
+  },
+  methods:{
+    ...mapActions(['fetchUser']),
+    previewImage(event) {
+      this.uploadValue=0;
+      this.img1=null;
+      this.imageData = event.target.files[0];
+      this.onUpload()
+    },
+    click1() {
+      this.$refs.input1.click()
+    },
+    onUpload(){
+      this.img1=null;
+      const storageRef=firebase.storage().ref(`${this.imageData.name}`).put(this.imageData);
+      storageRef.on(`state_changed`,snapshot=>{
+            this.uploadValue = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+          }, error=>{console.log(error.message)},
+          ()=>{this.uploadValue=100;
+            storageRef.snapshot.ref.getDownloadURL().then((url)=>{
+              this.img1 =url;
+              console.log(this.img1)
+            });
+          }
+      );
+    },
+    NextStepParams(){
+      const post = {
+        photo: this.img1,
+        caption: this.caption
+      }
+
+      firebase.firestore().collection("users")
+          .doc(this.currentUser.uid)
+          .set({
+            photo: post,
+            name: this.name,
+          }).then(() => {
+            this.fetchUser()
+            /*         this.steps.activeStep = 1*/
+            /* this.registerError = ''*/
+          }).catch(() => {
+            /*        this.registerError = error.code;*/
+          })
+    },
+    updateMessage (e) {
+      this.$store.commit('updateMessage', e.target.value)
+    },
+  },
+  watch: {
+    name(newName) {
+      localStorage.name = newName;
+    }
+  },
+  mounted() {
+    if(localStorage.name) this.name = localStorage.name;
+  },
+}
+</script>
+
+<style scoped>
+div {
+  color: inherit;
+}
+
+.pdf{
+  width: 60px;
+  height: 60px;
+  -moz-border-radius: 60px;
+  -webkit-border-radius: 60px;
+  object-fit: cover;
+  margin-left: 12px;
+}
+.row{
+  justify-content: space-between;
+}
+
+.right{
+  display: flex;
+  align-items: flex-end;
+  align-content: stretch;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+
+.left{
+  left: 110px;
+  position: absolute;
+}
+
+.box_01{
+  padding: 20px;
+  background-color: white;
+  border-radius: 20px;
+  text-align: left;
+  box-shadow: 0px 0px 7px #e2e2e2;
+  margin-left: 50px;
+  display: flex;
+  height: -webkit-fill-available;
+}
+.box_02{
+  padding: 20px;
+  background-color: #3B0E67;
+  border-radius: 20px;
+  text-align: left;
+  box-shadow: 0px 0px 7px #e2e2e2;
+  margin-left: 50px;
+  display: flex;
+
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.box_03{
+  padding: 20px;
+  background-color: white;
+  border-radius: 20px;
+  text-align: left;
+  box-shadow: 0px 0px 7px #e2e2e2;
+  margin-left: 50px;
+  display: flex;
+  height: -webkit-fill-available;
+  margin-top: -140px;
+  flex-direction: column;
+}
+
+.box_04{
+  padding: 20px;
+  background-color: white;
+  border-radius: 20px;
+  text-align: left;
+  box-shadow: 0px 0px 7px #e2e2e2;
+  margin-left: 50px;
+  display: flex;
+  height: -webkit-fill-available;
+  margin-top: 10px;
+  flex-direction: column;
+  margin-bottom: 30px;
+}
+.img_user{
+  margin-left: 80px;
+}
+.flex_01{
+  display: flex;
+}
+
+</style>
